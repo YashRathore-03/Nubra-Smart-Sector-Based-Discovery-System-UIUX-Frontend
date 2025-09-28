@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Watchlist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            min-height: 100vh;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .nav-left {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .nav-button.secondary {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-button {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Search Box */
+        .search-container {
+            padding: 16px 20px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 12px 16px;
+            gap: 12px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #ccc;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #666;
+        }
+
+        /* Stock List */
+        .stock-list {
+            background: #1a1a1a;
+        }
+
+        .stock-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .stock-item:hover {
+            background: #252525;
+        }
+
+        .stock-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stock-symbol {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .stock-exchange {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .stock-price {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .price {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .change.negative {
+            color: #ef4444;
+        }
+
+        .change.positive {
+            color: #22c55e;
+        }
+
+        /* AI Suggestions Section */
+        .ai-section {
+            background: #1a1a1a;
+            border-top: 2px solid #2563eb;
+            margin-top: 8px;
+        }
+
+        .ai-header {
+            padding: 16px 20px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        }
+
+        .ai-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .ai-toggle {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .ai-stock-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-bottom: 1px solid #333;
+            background: #1a1a1a;
+            position: relative;
+        }
+
+        .ai-stock-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #2563eb, #3b82f6);
+        }
+
+        .ai-stock-item:hover {
+            background: #252525;
+        }
+
+        .ai-stock-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .ai-stock-symbol {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .ai-stock-sector {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .ai-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .add-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .add-button:hover {
+            background: #3b82f6;
+        }
+
+        .why-button {
+            background: transparent;
+            color: #888;
+            border: 1px solid #444;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .ai-explanation {
+            padding: 12px 20px;
+            background: #222;
+            border-left: 3px solid #2563eb;
+            margin: 0 20px 16px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .ai-explanation-text {
+            font-size: 12px;
+            color: #ccc;
+            font-style: italic;
+        }
+
+        /* Diversification Section */
+        .diversification-section {
+            background: #1a1a1a;
+            border-top: 1px solid #333;
+            margin-top: 8px;
+        }
+
+        .diversification-header {
+            padding: 16px 20px 12px;
+            background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+        }
+
+        .diversification-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .diversification-nudge {
+            padding: 12px 20px;
+            background: #0f2027;
+            border-left: 3px solid #059669;
+            margin: 0 20px 16px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nudge-text {
+            font-size: 12px;
+            color: #a7f3d0;
+            font-style: italic;
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            padding: 16px 20px;
+            background: #1a1a1a;
+            border-top: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .demo-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .play-button {
+            background: transparent;
+            border: none;
+            color: #ccc;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .demo-text {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .watch-demo {
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .collapsible {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapsible.expanded {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Navigation -->
+        <div class="top-nav">
+            <div class="nav-left">
+                <button class="nav-button">My Basket</button>
+                <button class="nav-button secondary">Saved Baskets</button>
+            </div>
+            <div class="nav-right">
+                <button class="icon-button">+</button>
+                <button class="icon-button">⊞</button>
+            </div>
+        </div>
+
+        <!-- Search Box -->
+        <div class="search-container">
+            <div class="search-box">
+                <span style="color: #666;">🔍</span>
+                <input type="text" class="search-input" placeholder="Search and add to Watchlist">
+                <span style="color: #666;">⚙️</span>
+            </div>
+        </div>
+
+        <!-- User's Watchlist -->
+        <div class="stock-list">
+            <div class="stock-item">
+                <div class="stock-info">
+                    <div class="stock-symbol">SBIN</div>
+                    <div class="stock-exchange">NSE</div>
+                </div>
+                <div class="stock-price">
+                    <div class="price">856.95</div>
+                    <div class="change negative">▼ 4.20 (-0.49%)</div>
+                </div>
+            </div>
+
+            <div class="stock-item">
+                <div class="stock-info">
+                    <div class="stock-symbol">SBIN</div>
+                    <div class="stock-exchange">BSE</div>
+                </div>
+                <div class="stock-price">
+                    <div class="price">857.00</div>
+                    <div class="change negative">▼ 4.05 (-0.47%)</div>
+                </div>
+            </div>
+
+            <div class="stock-item">
+                <div class="stock-info">
+                    <div class="stock-symbol">IOC</div>
+                    <div class="stock-exchange">NSE</div>
+                </div>
+                <div class="stock-price">
+                    <div class="price">145.04</div>
+                    <div class="change negative">▼ 1.18 (-0.81%)</div>
+                </div>
+            </div>
+
+            <div class="stock-item">
+                <div class="stock-info">
+                    <div class="stock-symbol">IOC</div>
+                    <div class="stock-exchange">BSE</div>
+                </div>
+                <div class="stock-price">
+                    <div class="price">145.05</div>
+                    <div class="change negative">▼ 1.10 (-0.75%)</div>
+                </div>
+            </div>
+
+            <div class="stock-item">
+                <div class="stock-info">
+                    <div class="stock-symbol">ETERNAL</div>
+                    <div class="stock-exchange">NSE</div>
+                </div>
+                <div class="stock-price">
+                    <div class="price">321.00</div>
+                    <div class="change negative">▼ 11.25 (-3.39%)</div>
+                </div>
+            </div>
+
+            <div class="stock-item">
+                <div class="stock-info">
+                    <div class="stock-symbol">ETERNAL</div>
+                    <div class="stock-exchange">BSE</div>
+                </div>
+                <div class="stock-price">
+                    <div class="price">321.05</div>
+                    <div class="change negative">▼ 11.25 (-3.39%)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Suggestions Section -->
+        <div class="ai-section">
+            <div class="ai-header">
+                <div class="ai-title">
+                    <span>🔮</span>
+                    <span>AI Suggested Peers (based on your watchlist)</span>
+                </div>
+                <button class="ai-toggle" onclick="toggleAI()">Collapse</button>
+            </div>
+            
+            <div id="ai-content" class="collapsible expanded">
+                <div class="ai-stock-item">
+                    <div class="ai-stock-info">
+                        <div class="ai-stock-symbol">TCS</div>
+                        <div class="ai-stock-sector">IT Services — Peer of Banking sector</div>
+                    </div>
+                    <div class="ai-actions">
+                        <div class="stock-price">
+                            <div class="price" style="font-size: 14px;">3,600.50</div>
+                            <div class="change positive">▲ +0.45%</div>
+                        </div>
+                        <button class="add-button">+ Add</button>
+                        <button class="why-button" onclick="toggleExplanation('tcs')">Why?</button>
+                    </div>
+                </div>
+                
+                <div id="tcs-explanation" class="ai-explanation" style="display: none;">
+                    <div class="ai-explanation-text">
+                        "You saved SBIN (Banking). TCS is a market leader with strong correlations to banking sector performance."
+                    </div>
+                </div>
+
+                <div class="ai-stock-item">
+                    <div class="ai-stock-info">
+                        <div class="ai-stock-symbol">WIPRO</div>
+                        <div class="ai-stock-sector">IT Services</div>
+                    </div>
+                    <div class="ai-actions">
+                        <div class="stock-price">
+                            <div class="price" style="font-size: 14px;">460.75</div>
+                            <div class="change negative">▼ -0.32%</div>
+                        </div>
+                        <button class="add-button">+ Add</button>
+                        <button class="why-button" onclick="toggleExplanation('wipro')">Why?</button>
+                    </div>
+                </div>
+
+                <div id="wipro-explanation" class="ai-explanation" style="display: none;">
+                    <div class="ai-explanation-text">
+                        "Similar sector exposure to your energy holdings (IOC). Strong IT services correlation."
+                    </div>
+                </div>
+
+                <div class="ai-stock-item">
+                    <div class="ai-stock-info">
+                        <div class="ai-stock-symbol">HCLTECH</div>
+                        <div class="ai-stock-sector">IT Services</div>
+                    </div>
+                    <div class="ai-actions">
+                        <div class="stock-price">
+                            <div class="price" style="font-size: 14px;">1,550.20</div>
+                            <div class="change positive">▲ +1.12%</div>
+                        </div>
+                        <button class="add-button">+ Add</button>
+                        <button class="why-button" onclick="toggleExplanation('hcl')">Why?</button>
+                    </div>
+                </div>
+
+                <div id="hcl-explanation" class="ai-explanation" style="display: none;">
+                    <div class="ai-explanation-text">
+                        "Complements your portfolio with strong IT services exposure and growth potential."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diversification Section -->
+        <div class="diversification-section">
+            <div class="diversification-header">
+                <div class="diversification-title">
+                    <span>🌍</span>
+                    <span>Explore Other Sectors</span>
+                </div>
+            </div>
+
+            <div class="ai-stock-item">
+                <div class="ai-stock-info">
+                    <div class="ai-stock-symbol">HDFCBANK</div>
+                    <div class="ai-stock-sector">Banking</div>
+                </div>
+                <div class="ai-actions">
+                    <button class="add-button">+ Add</button>
+                </div>
+            </div>
+
+            <div class="ai-stock-item">
+                <div class="ai-stock-info">
+                    <div class="ai-stock-symbol">RELIANCE</div>
+                    <div class="ai-stock-sector">Energy & Diversified</div>
+                </div>
+                <div class="ai-actions">
+                    <button class="add-button">+ Add</button>
+                </div>
+            </div>
+
+            <div class="ai-stock-item">
+                <div class="ai-stock-info">
+                    <div class="ai-stock-symbol">MARUTI</div>
+                    <div class="ai-stock-sector">Automobile</div>
+                </div>
+                <div class="ai-actions">
+                    <button class="add-button">+ Add</button>
+                </div>
+            </div>
+
+            <div class="diversification-nudge">
+                <div class="nudge-text">
+                    "Your watchlist is 60% Banking & Energy stocks. Consider balancing with IT Services or Automobile sectors."
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="bottom-bar">
+            <div class="demo-section">
+                <button class="play-button">▶</button>
+                <span class="demo-text">Navigating Nubra's Watchlist</span>
+            </div>
+            <a href="#" class="watch-demo">Watch demo</a>
+        </div>
+    </div>
+
+    <script>
+        let aiExpanded = true;
+        
+        function toggleAI() {
+            const content = document.getElementById('ai-content');
+            const button = document.querySelector('.ai-toggle');
+            
+            aiExpanded = !aiExpanded;
+            
+            if (aiExpanded) {
+                content.classList.add('expanded');
+                button.textContent = 'Collapse';
+            } else {
+                content.classList.remove('expanded');
+                button.textContent = 'Expand';
+            }
+        }
+
+        function toggleExplanation(stock) {
+            const explanation = document.getElementById(stock + '-explanation');
+            if (explanation.style.display === 'none') {
+                // Hide all other explanations first
+                document.querySelectorAll('.ai-explanation').forEach(el => {
+                    el.style.display = 'none';
+                });
+                explanation.style.display = 'block';
+            } else {
+                explanation.style.display = 'none';
+            }
+        }
+
+        // Add click handlers for add buttons
+        document.querySelectorAll('.add-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.textContent = '✓ Added';
+                this.style.background = '#22c55e';
+                setTimeout(() => {
+                    this.textContent = '+ Add';
+                    this.style.background = '#2563eb';
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
